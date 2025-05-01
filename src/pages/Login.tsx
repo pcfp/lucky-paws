@@ -31,7 +31,7 @@ const LoginPage =() => {
       console.log('Login successful:', response.status)
       // Ensure we're authenticated before navigating
       if (response.status === 200) {
-        navigate('/search')
+        navigate('/lucky-dogs/search')
       } else {
         setError('Login failed. Please try again.')
       }
