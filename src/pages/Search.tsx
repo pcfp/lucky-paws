@@ -168,6 +168,7 @@ const SearchPage = () => {
     if (nextCursor) {
       setCurrentPage(prev => prev + 1);
       handleSearch(nextCursor);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -175,6 +176,7 @@ const SearchPage = () => {
     if (prevCursor) {
       setCurrentPage(prev => prev - 1);
       handleSearch(prevCursor);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
