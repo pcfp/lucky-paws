@@ -24,6 +24,11 @@ import { MultiSelect } from "@/components/ui/multi-select";
 //   SelectValue,
 // } from "@/components/ui/select"
 import { toast } from "sonner"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -216,13 +221,54 @@ const SearchPage = () => {
             </Card>
 
             <div className="flex-1 flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={handleGenerateMatch}
-                disabled={favorites.size === 0}
-              >
-                Generate Match
-              </Button>
+              <HoverCard openDelay={200}>
+                <HoverCardTrigger asChild>
+                  <Button
+                    variant="outline"
+                    onClick={handleGenerateMatch}
+                    disabled={favorites.size === 0}
+                  >
+                    Generate Match {favorites.size > 0 && (
+                      <Heart className="h-4 w-4 text-red-500 fill-current" />
+                    )}
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent 
+                  className="w-80 p-0" 
+                  align="end"
+                >
+                  <div className="p-4 pb-2">
+                    <h4 className="font-medium leading-none mb-2">
+                      Favorited Dogs ({favorites.size})
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      Click to generate a match from your favorites
+                    </p>
+                  </div>
+                  <div className="max-h-[300px] overflow-auto">
+                    {dogs
+                      .filter(dog => favorites.has(dog.id))
+                      .map(dog => (
+                        <div
+                          key={dog.id}
+                          className="flex items-center gap-3 p-4 hover:bg-muted border-t"
+                        >
+                          <img
+                            src={dog.img}
+                            alt={dog.name}
+                            className="h-12 w-12 rounded-full object-cover"
+                          />
+                          <div>
+                            <h5 className="font-medium text-sm">{dog.name}</h5>
+                            <p className="text-xs text-muted-foreground">
+                              {dog.breed}
+                            </p>
+                          </div>
+                        </div>
+                    ))}
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
               <Button
                 variant="outline"
                 onClick={async () => {
@@ -318,11 +364,35 @@ const SearchPage = () => {
           {loading ? (
             // Loading skeletons
             Array.from({ length: 8 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
+              <Card 
+                key={i} 
+                className="overflow-hidden group border-gray-200 hover:shadow-lg transition-shadow duration-200"
+              >
+                <div className="relative aspect-[4/3]">
+                  <div className="absolute inset-0 p-3">
+                    <Skeleton className="w-full h-full rounded-[1.25rem]" />
+                  </div>
+                  <div className="absolute top-5 right-5">
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                  </div>
+                </div>
                 <CardContent className="p-4">
-                  <Skeleton className="h-4 w-2/3 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <Skeleton className="h-6 w-32" /> {/* Name */}
+                      <Skeleton className="h-4 w-24" /> {/* Breed */}
+                    </div>
+                  </div>
+                  <div className="mt-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-16" /> {/* Age label */}
+                      <Skeleton className="h-4 w-20" /> {/* Age value */}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-24" /> {/* Zip Code label */}
+                      <Skeleton className="h-4 w-20" /> {/* Zip Code value */}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))
