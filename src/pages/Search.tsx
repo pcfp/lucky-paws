@@ -6,29 +6,18 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-import { Heart, Search as SearchIcon, Filter, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MultiSelect } from "@/components/ui/multi-select";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select"
-import { toast } from "sonner"
+import { toast } from "sonner";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { FilterDialog } from "@/components/filter-dialog";
+import { MatchDialog } from "@/components/match-dialog";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -40,13 +29,21 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zipCode, setZipCode] = useState('');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Dog[]>([]);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [prevCursor, setPrevCursor] = useState<string | null>(null);
   const [matchedDog, setMatchedDog] = useState<Dog | null>(null);
+  const [isMatchDialogOpen, setIsMatchDialogOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [tempBreeds, setTempBreeds] = useState<string[]>([]);
+  const [tempZipCode, setTempZipCode] = useState('');
+  const [ageMin, setAgeMin] = useState<number | null>(null);
+  const [ageMax, setAgeMax] = useState<number | null>(null);
+  const [tempAgeMin, setTempAgeMin] = useState<number | null>(null);
+  const [tempAgeMax, setTempAgeMax] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchBreeds = async () => {
@@ -99,6 +96,8 @@ const SearchPage = () => {
       
       if (selectedBreeds.length > 0) searchParams.breeds = selectedBreeds;
       if (zipCode) searchParams.zipCodes = [zipCode];
+      if (ageMin !== null) searchParams.ageMin = ageMin;
+      if (ageMax !== null) searchParams.ageMax = ageMax;
 
       const searchResponse = await searchDogs(searchParams);
       const { resultIds, total: totalResults, next, prev } = searchResponse.data;
@@ -127,33 +126,33 @@ const SearchPage = () => {
     }
   };
 
-  const toggleFavorite = (dogId: string) => {
+  const toggleFavorite = (dog: Dog) => {
     setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(dogId)) {
-        newFavorites.delete(dogId);
+      const isFavorite = prev.some(fav => fav.id === dog.id);
+      if (isFavorite) {
+        return prev.filter(fav => fav.id !== dog.id);
       } else {
-        newFavorites.add(dogId);
+        return [...prev, dog];
       }
-      return newFavorites;
     });
   };
 
   const handleGenerateMatch = async () => {
-    if (favorites.size === 0) {
+    if (favorites.length === 0) {
       toast.error("Please favorite some dogs first!");
       return;
     }
 
     try {
       setLoading(true);
-      const favoriteIds = Array.from(favorites);
+      const favoriteIds = favorites.map(dog => dog.id);
       const matchResponse = await getMatch(favoriteIds);
       const matchId = matchResponse.data.match;
       
       if (matchId) {
         const [matchedDogData] = (await getDogsByIds([matchId])).data;
         setMatchedDog(matchedDogData);
+        setIsMatchDialogOpen(true);
         toast.success("Found your perfect match! 🐾");
       }
     } catch (err) {
@@ -180,78 +179,53 @@ const SearchPage = () => {
     }
   };
 
+  const handleFilterConfirm = () => {
+    setSelectedBreeds(tempBreeds);
+    setZipCode(tempZipCode);
+    setAgeMin(tempAgeMin);
+    setAgeMax(tempAgeMax);
+    setIsFilterOpen(false);
+    handleSearch();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-        <div className="sticky top-0 z-50 ">
-            {/* Top Navigation Bar */}
-            <div className=" top-0 bg-white border-b">
-                <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-primary">Lucky Dogs</h1>
-                    </div>
-                    
-                    {/* Search Bar */}
-                    <Card className="flex-1 mx-4 shadow-sm">
-                    <CardContent className="p-2">
-                        <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                            <MultiSelect
-                            selected={selectedBreeds}
-                            setSelected={setSelectedBreeds}
-                            options={breeds}
-                            placeholder="Select breeds..."
-                            />
-                        </div>
-                        <div className="h-8 w-px bg-gray-200" />
-                        <Input
-                            type="text"
-                            placeholder="Enter zip code"
-                            value={zipCode}
-                            onChange={(e) => setZipCode(e.target.value)}
-                            className="border-0 w-[150px]"
-                        />
-                        <Button 
-                            onClick={() => handleSearch()}
-                            className="rounded-full"
-                            size="icon"
-                            disabled={loading}
-                        >
-                            <SearchIcon className="h-4 w-4" />
-                        </Button>
-                        </div>
-                    </CardContent>
-                    </Card>
-
-                    <div className="flex-1 flex justify-end gap-2">
-                    <HoverCard openDelay={200}>
-                        <HoverCardTrigger asChild>
-                        <Button
-                            variant="outline"
-                            onClick={handleGenerateMatch}
-                            disabled={favorites.size === 0}
-                        >
-                            Generate Match {favorites.size > 0 && (
-                            <Heart className="h-4 w-4 text-red-500 fill-current" />
-                            )}
-                        </Button>
-                        </HoverCardTrigger>
-                        <HoverCardContent 
+      <div className="sticky top-0 z-50">
+        {/* Top Navigation Bar */}
+        <div className="top-0 bg-white border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold text-primary">
+                Lucky Paws
+              </div>
+              
+              <div className="flex-1 flex justify-end gap-2">
+                <HoverCard openDelay={200}>
+                  <HoverCardTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={handleGenerateMatch}
+                      disabled={favorites.length === 0}
+                    >
+                      Generate Match {favorites.length > 0 && (
+                        <Heart className="h-4 w-4 text-red-500 fill-current" />
+                      )}
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent 
                         className="w-80 p-0" 
                         align="end"
                         >
                         <div className="p-4 pb-2">
                             <h4 className="font-medium leading-none mb-2">
-                            Favorited Dogs ({favorites.size})
+                            Favorited Dogs ({favorites.length})
                             </h4>
                             <p className="text-sm text-muted-foreground">
                             Click to generate a match from your favorites
                             </p>
                         </div>
                         <div className="max-h-[300px] overflow-auto">
-                            {dogs
-                            .filter(dog => favorites.has(dog.id))
-                            .map(dog => (
+                            {favorites.map(dog => (
                                 <div
                                 key={dog.id}
                                 className="flex items-center gap-3 p-4 hover:bg-muted border-t"
@@ -271,96 +245,86 @@ const SearchPage = () => {
                             ))}
                         </div>
                         </HoverCardContent>
-                    </HoverCard>
-                    <Button
-                        variant="outline"
-                        onClick={async () => {
-                        try {
-                            await logout();
-                            navigate('/');
-                        } catch (err) {
-                            console.error('Logout failed:', err);
-                        }
-                        }}
-                    >
-                        Log out
-                    </Button>
-                    </div>
-                </div>
-                </div>
+                </HoverCard>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      await logout();
+                      navigate('/');
+                    } catch (err) {
+                      console.error('Logout failed:', err);
+                    }
+                  }}
+                >
+                  Log out
+                </Button>
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Filters Bar */}
-            <div className="border-b bg-white">
-                <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm" className="rounded-full">
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filters
-                    </Button>
-                    {selectedBreeds.map(breed => (
-                        <Badge key={breed} variant="secondary" className="rounded-full">
-                        {breed}
-                        </Badge>
-                    ))}
-                    {zipCode && (
-                        <Badge variant="secondary" className="rounded-full">
-                        ZIP: {zipCode}
-                        </Badge>
-                    )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">Sort by breed:</span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-                        handleSearch();
-                        }}
-                    >
-                        <ArrowUpDown className="h-4 w-4 mr-2" />
-                        {sortOrder === 'asc' ? 'A to Z' : 'Z to A'}
-                    </Button>
-                    </div>
-                </div>
-                </div>
+        {/* Filters Bar */}
+        <div className="border-b bg-white">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <FilterDialog
+                  isOpen={isFilterOpen}
+                  onOpenChange={setIsFilterOpen}
+                  onFilterConfirm={handleFilterConfirm}
+                  breeds={breeds}
+                  selectedBreeds={tempBreeds}
+                  onBreedsChange={setTempBreeds}
+                  zipCode={tempZipCode}
+                  onZipCodeChange={setTempZipCode}
+                  ageMin={tempAgeMin}
+                  onAgeMinChange={setTempAgeMin}
+                  ageMax={tempAgeMax}
+                  onAgeMaxChange={setTempAgeMax}
+                />
+                {selectedBreeds.map(breed => (
+                  <Badge key={breed} variant="secondary" className="rounded-full">
+                    Breed: {breed}
+                  </Badge>
+                ))}
+                {zipCode && (
+                  <Badge variant="secondary" className="rounded-full">
+                    Zip Code: {zipCode}
+                  </Badge>
+                )}
+                {(ageMin !== null || ageMax !== null) && (
+                  <Badge variant="secondary" className="rounded-full">
+                    Age: {ageMin ?? '0'} - {ageMax ?? '∞'}
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Sort by breed:</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                    handleSearch();
+                  }}
+                >
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  {sortOrder === 'asc' ? 'A to Z' : 'Z to A'}
+                </Button>
+              </div>
             </div>
+          </div>
+        </div>
       </div>
+
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-2">
+      <main className="container mx-auto px-4 py-4">
         {error && (
           <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg">
             {error}
           </div>
-        )}
-
-        {matchedDog && (
-          <Card className="mb-8 bg-gradient-to-r from-purple-100 to-pink-100">
-            <CardHeader>
-              <CardTitle>Your Perfect Match! 🎉</CardTitle>
-              <CardDescription>
-                Based on your favorites, we think you'll love {matchedDog.name}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex gap-6">
-              <img
-                src={matchedDog.img}
-                alt={matchedDog.name}
-                className="w-48 h-48 object-cover rounded-lg"
-              />
-              <div>
-                <h3 className="text-xl font-semibold mb-2">{matchedDog.name}</h3>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p>Breed: {matchedDog.breed}</p>
-                  <p>Age: {matchedDog.age} years</p>
-                  <p>Location: {matchedDog.zip_code}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -416,11 +380,11 @@ const SearchPage = () => {
                     variant="ghost"
                     size="icon"
                     className={`absolute top-5 right-5 rounded-full bg-white shadow-sm hover:scale-110 transition-transform duration-200 ${
-                      favorites.has(dog.id) ? 'text-red-500' : 'text-gray-600'
+                      favorites.some(fav => fav.id === dog.id) ? 'text-red-500' : 'text-gray-600'
                     }`}
-                    onClick={() => toggleFavorite(dog.id)}
+                    onClick={() => toggleFavorite(dog)}
                   >
-                    <Heart className={`h-5 w-5 ${favorites.has(dog.id) ? 'fill-current' : ''}`} />
+                    <Heart className={`h-5 w-5 ${favorites.some(fav => fav.id === dog.id) ? 'fill-current' : ''}`} />
                   </Button>
                 </div>
                 <CardContent className="p-4">
@@ -479,6 +443,13 @@ const SearchPage = () => {
             </div>
           </div>
         )}
+
+        {/* Match Dialog */}
+        <MatchDialog
+          isOpen={isMatchDialogOpen}
+          onOpenChange={setIsMatchDialogOpen}
+          matchedDog={matchedDog}
+        />
       </main>
     </div>
   );
