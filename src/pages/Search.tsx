@@ -180,152 +180,153 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-primary">Lucky Dogs</h1>
-            </div>
-            
-            {/* Search Bar */}
-            <Card className="flex-1 mx-4 shadow-sm">
-              <CardContent className="p-2">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <MultiSelect
-                      selected={selectedBreeds}
-                      setSelected={setSelectedBreeds}
-                      options={breeds}
-                      placeholder="Select breeds..."
-                    />
-                  </div>
-                  <div className="h-8 w-px bg-gray-200" />
-                  <Input
-                    type="text"
-                    placeholder="Enter zip code"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    className="border-0 w-[150px]"
-                  />
-                  <Button 
-                    onClick={() => handleSearch()}
-                    className="rounded-full"
-                    size="icon"
-                    disabled={loading}
-                  >
-                    <SearchIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex-1 flex justify-end gap-2">
-              <HoverCard openDelay={200}>
-                <HoverCardTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={handleGenerateMatch}
-                    disabled={favorites.size === 0}
-                  >
-                    Generate Match {favorites.size > 0 && (
-                      <Heart className="h-4 w-4 text-red-500 fill-current" />
-                    )}
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent 
-                  className="w-80 p-0" 
-                  align="end"
-                >
-                  <div className="p-4 pb-2">
-                    <h4 className="font-medium leading-none mb-2">
-                      Favorited Dogs ({favorites.size})
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Click to generate a match from your favorites
-                    </p>
-                  </div>
-                  <div className="max-h-[300px] overflow-auto">
-                    {dogs
-                      .filter(dog => favorites.has(dog.id))
-                      .map(dog => (
-                        <div
-                          key={dog.id}
-                          className="flex items-center gap-3 p-4 hover:bg-muted border-t"
-                        >
-                          <img
-                            src={dog.img}
-                            alt={dog.name}
-                            className="h-12 w-12 rounded-full object-cover"
-                          />
-                          <div>
-                            <h5 className="font-medium text-sm">{dog.name}</h5>
-                            <p className="text-xs text-muted-foreground">
-                              {dog.breed}
-                            </p>
-                          </div>
+        <div className="sticky top-0 z-50 ">
+            {/* Top Navigation Bar */}
+            <div className=" top-0 bg-white border-b">
+                <div className="container mx-auto px-4 py-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                    <h1 className="text-2xl font-bold text-primary">Lucky Dogs</h1>
+                    </div>
+                    
+                    {/* Search Bar */}
+                    <Card className="flex-1 mx-4 shadow-sm">
+                    <CardContent className="p-2">
+                        <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                            <MultiSelect
+                            selected={selectedBreeds}
+                            setSelected={setSelectedBreeds}
+                            options={breeds}
+                            placeholder="Select breeds..."
+                            />
                         </div>
+                        <div className="h-8 w-px bg-gray-200" />
+                        <Input
+                            type="text"
+                            placeholder="Enter zip code"
+                            value={zipCode}
+                            onChange={(e) => setZipCode(e.target.value)}
+                            className="border-0 w-[150px]"
+                        />
+                        <Button 
+                            onClick={() => handleSearch()}
+                            className="rounded-full"
+                            size="icon"
+                            disabled={loading}
+                        >
+                            <SearchIcon className="h-4 w-4" />
+                        </Button>
+                        </div>
+                    </CardContent>
+                    </Card>
+
+                    <div className="flex-1 flex justify-end gap-2">
+                    <HoverCard openDelay={200}>
+                        <HoverCardTrigger asChild>
+                        <Button
+                            variant="outline"
+                            onClick={handleGenerateMatch}
+                            disabled={favorites.size === 0}
+                        >
+                            Generate Match {favorites.size > 0 && (
+                            <Heart className="h-4 w-4 text-red-500 fill-current" />
+                            )}
+                        </Button>
+                        </HoverCardTrigger>
+                        <HoverCardContent 
+                        className="w-80 p-0" 
+                        align="end"
+                        >
+                        <div className="p-4 pb-2">
+                            <h4 className="font-medium leading-none mb-2">
+                            Favorited Dogs ({favorites.size})
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                            Click to generate a match from your favorites
+                            </p>
+                        </div>
+                        <div className="max-h-[300px] overflow-auto">
+                            {dogs
+                            .filter(dog => favorites.has(dog.id))
+                            .map(dog => (
+                                <div
+                                key={dog.id}
+                                className="flex items-center gap-3 p-4 hover:bg-muted border-t"
+                                >
+                                <img
+                                    src={dog.img}
+                                    alt={dog.name}
+                                    className="h-12 w-12 rounded-full object-cover"
+                                />
+                                <div>
+                                    <h5 className="font-medium text-sm">{dog.name}</h5>
+                                    <p className="text-xs text-muted-foreground">
+                                    {dog.breed}
+                                    </p>
+                                </div>
+                                </div>
+                            ))}
+                        </div>
+                        </HoverCardContent>
+                    </HoverCard>
+                    <Button
+                        variant="outline"
+                        onClick={async () => {
+                        try {
+                            await logout();
+                            navigate('/');
+                        } catch (err) {
+                            console.error('Logout failed:', err);
+                        }
+                        }}
+                    >
+                        Log out
+                    </Button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            {/* Filters Bar */}
+            <div className="border-b bg-white">
+                <div className="container mx-auto px-4 py-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm" className="rounded-full">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filters
+                    </Button>
+                    {selectedBreeds.map(breed => (
+                        <Badge key={breed} variant="secondary" className="rounded-full">
+                        {breed}
+                        </Badge>
                     ))}
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  try {
-                    await logout();
-                    navigate('/');
-                  } catch (err) {
-                    console.error('Logout failed:', err);
-                  }
-                }}
-              >
-                Log out
-              </Button>
+                    {zipCode && (
+                        <Badge variant="secondary" className="rounded-full">
+                        ZIP: {zipCode}
+                        </Badge>
+                    )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">Sort by breed:</span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                        handleSearch();
+                        }}
+                    >
+                        <ArrowUpDown className="h-4 w-4 mr-2" />
+                        {sortOrder === 'asc' ? 'A to Z' : 'Z to A'}
+                    </Button>
+                    </div>
+                </div>
+                </div>
             </div>
-          </div>
-        </div>
       </div>
-
-      {/* Filters Bar */}
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="rounded-full">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
-              {selectedBreeds.map(breed => (
-                <Badge key={breed} variant="secondary" className="rounded-full">
-                  {breed}
-                </Badge>
-              ))}
-              {zipCode && (
-                <Badge variant="secondary" className="rounded-full">
-                  ZIP: {zipCode}
-                </Badge>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Sort by breed:</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-                  handleSearch();
-                }}
-              >
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                {sortOrder === 'asc' ? 'A to Z' : 'Z to A'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-2">
         {error && (
