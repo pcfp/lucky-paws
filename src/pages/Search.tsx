@@ -385,14 +385,14 @@ const SearchPage = () => {
                     <Heart className={`h-5 w-5 ${favorites.some(fav => fav.id === dog.id) ? 'fill-current' : ''}`} />
                   </Button>
                 </div>
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 text-left">{dog.name}</h3>
-                      <p className="text-sm text-gray-500 text-left">{dog.breed}</p>
+                    <div className="w-full">
+                      <h3 className="text-base sm:text-lg font-medium text-gray-900 text-left truncate">{dog.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500 text-left truncate">{dog.breed}</p>
                     </div>
                   </div>
-                  <div className="mt-1 text-sm text-gray-600">
+                  <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">Age:</span>
                       <span>{dog.age} years</span>
