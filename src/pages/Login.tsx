@@ -86,7 +86,6 @@ const LoginPage =() => {
               </div>
             )}
             <Button 
-              variant="outline" 
               type="submit" 
               className="w-full"
               disabled={loading}
