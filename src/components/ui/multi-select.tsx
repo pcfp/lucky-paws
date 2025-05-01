@@ -83,6 +83,7 @@ export function MultiSelect({
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
+            onClick={() => setOpen(true)}
             placeholder={placeholder}
             className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1"
           />
@@ -102,6 +103,7 @@ export function MultiSelect({
                   onSelect={() => {
                     setInputValue("")
                     setSelected([...selected, option])
+                    setOpen(false)
                   }}
                   className="cursor-pointer"
                 >
