@@ -82,10 +82,3 @@ src/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Dog API](https://dog.ceo/dog-api/) for providing the dog data
-- [Vite](https://vitejs.dev/) for the blazing fast development experience
-- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
-- [Radix UI](https://www.radix-ui.com/) for the accessible UI components
