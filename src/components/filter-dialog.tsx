@@ -21,6 +21,10 @@ interface FilterDialogProps {
   onBreedsChange: (breeds: string[]) => void;
   zipCode: string;
   onZipCodeChange: (zipCode: string) => void;
+  ageMin: number | null;
+  onAgeMinChange: (age: number | null) => void;
+  ageMax: number | null;
+  onAgeMaxChange: (age: number | null) => void;
 }
 
 export function FilterDialog({
@@ -32,7 +36,25 @@ export function FilterDialog({
   onBreedsChange,
   zipCode,
   onZipCodeChange,
+  ageMin,
+  onAgeMinChange,
+  ageMax,
+  onAgeMaxChange,
 }: FilterDialogProps) {
+  const handleAgeMinChange = (value: string) => {
+    const num = value === '' ? null : Number(value);
+    if (num === null || (!isNaN(num) && num >= 0)) {
+      onAgeMinChange(num);
+    }
+  };
+
+  const handleAgeMaxChange = (value: string) => {
+    const num = value === '' ? null : Number(value);
+    if (num === null || (!isNaN(num) && num >= 0)) {
+      onAgeMaxChange(num);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
@@ -70,6 +92,29 @@ export function FilterDialog({
               value={zipCode}
               onChange={(e) => onZipCodeChange(e.target.value)}
             />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">Age Range</label>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Min age"
+                  value={ageMin ?? ''}
+                  onChange={(e) => handleAgeMinChange(e.target.value)}
+                />
+              </div>
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Max age"
+                  value={ageMax ?? ''}
+                  onChange={(e) => handleAgeMaxChange(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         </div>
         <DialogFooter>
