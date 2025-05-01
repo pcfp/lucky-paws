@@ -9,21 +9,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// import { Label } from "@/components/ui/label";
 import { Heart, Search as SearchIcon, Filter, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/ui/multi-select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select"
 import { toast } from "sonner"
 
 const ITEMS_PER_PAGE = 20;
@@ -64,8 +63,8 @@ const SearchPage = () => {
   }, [selectedBreeds, zipCode, sortOrder]);
 
   const handleSearch = async (fromCursor?: string) => {
+    // Only reset pagination state if it's a new search (no cursor)
     if (!fromCursor) {
-      // Reset pagination when starting a new search
       setCurrentPage(0);
       setNextCursor(null);
       setPrevCursor(null);
@@ -75,14 +74,23 @@ const SearchPage = () => {
     setError(null);
 
     try {
+      // Extract cursor parameters from the fromCursor string if provided
+      let cursorParams = {};
+      if (fromCursor) {
+        try {
+          // The cursor might be a URL-encoded query string
+          const params = new URLSearchParams(fromCursor);
+          cursorParams = Object.fromEntries(params.entries());
+        } catch (e) {
+          console.error('Failed to parse cursor:', e);
+        }
+      }
+
       const searchParams: any = {
         size: ITEMS_PER_PAGE,
         sort: `breed:${sortOrder}`,
+        ...cursorParams, // Include any cursor parameters
       };
-      
-      if (fromCursor) {
-        searchParams.from = fromCursor;
-      }
       
       if (selectedBreeds.length > 0) searchParams.breeds = selectedBreeds;
       if (zipCode) searchParams.zipCodes = [zipCode];
@@ -103,10 +111,12 @@ const SearchPage = () => {
     } catch (err) {
       console.error('Search failed:', err);
       setError('Failed to search for dogs');
-      // Reset pagination on error
-      setCurrentPage(0);
-      setNextCursor(null);
-      setPrevCursor(null);
+      // Only reset pagination on error if it's not a pagination request
+      if (!fromCursor) {
+        setCurrentPage(0);
+        setNextCursor(null);
+        setPrevCursor(null);
+      }
     } finally {
       setLoading(false);
     }
