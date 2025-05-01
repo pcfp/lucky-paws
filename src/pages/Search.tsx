@@ -62,7 +62,7 @@ const SearchPage = () => {
   useEffect(() => {
     setCurrentPage(0);
     handleSearch();
-  }, [selectedBreeds, zipCode, sortOrder]);
+  }, [selectedBreeds, zipCode, sortOrder, ageMin, ageMax]);
 
   const handleSearch = async (fromCursor?: string) => {
     // Only reset pagination state if it's a new search (no cursor)
@@ -98,7 +98,6 @@ const SearchPage = () => {
       if (zipCode) searchParams.zipCodes = [zipCode];
       if (ageMin !== null) searchParams.ageMin = ageMin;
       if (ageMax !== null) searchParams.ageMax = ageMax;
-
       const searchResponse = await searchDogs(searchParams);
       const { resultIds, total: totalResults, next, prev } = searchResponse.data;
       
@@ -185,7 +184,6 @@ const SearchPage = () => {
     setAgeMin(tempAgeMin);
     setAgeMax(tempAgeMax);
     setIsFilterOpen(false);
-    handleSearch();
   };
 
   return (
