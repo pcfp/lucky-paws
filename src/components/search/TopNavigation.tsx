@@ -73,7 +73,7 @@ export function TopNavigation({ favorites, onGenerateMatch }: TopNavigationProps
               onClick={async () => {
                 try {
                   await logout();
-                  navigate('/');
+                  navigate('/lucky-paws/');
                 } catch (err) {
                   console.error('Logout failed:', err);
                 }
