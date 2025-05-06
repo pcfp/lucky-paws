@@ -3,6 +3,7 @@
 A modern web application for finding and matching with adoptable dogs. Built with React, TypeScript, and Vite.
 
 See it live: https://pcfp.github.io/lucky-paws/
+Make sure to "Allow third-party cookies" on Chrome for the site to work
 
 ## Features
 
